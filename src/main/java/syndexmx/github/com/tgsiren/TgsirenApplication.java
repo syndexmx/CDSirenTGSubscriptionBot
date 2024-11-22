@@ -12,6 +12,7 @@ import syndexmx.github.com.tgsiren.webmonitor.fetcherImpl.FetcherImpl;
 import java.io.IOException;
 
 import static java.lang.Thread.sleep;
+import static syndexmx.github.com.tgsiren.utils.HtmlBlockCutter.cutTagedBlockOut;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractTagedBlock;
 
 @SpringBootApplication
@@ -27,10 +28,13 @@ public class TgsirenApplication {
 		for (int i = 0; i < 1; i++) {
             try {
                 System.out.println(
-                        extractTagedBlock(
-                        fetcher.getPage("https://t.me/s/mchs_bryansk").toString(),
-                                "main",
-                                "tgme_main")
+                        cutTagedBlockOut(cutTagedBlockOut(cutTagedBlockOut(
+                            extractTagedBlock(
+                            fetcher.getPage("https://t.me/s/mchs_bryansk").toString(),
+                                    "main",
+                                    "tgme_main"),
+                                "picture"), "svg"), "tg-emoji"
+                        )
                 );
             } catch (IOException e) {
                 throw new RuntimeException(e);
