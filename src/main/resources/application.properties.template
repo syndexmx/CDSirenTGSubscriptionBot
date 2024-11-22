@@ -1,0 +1,12 @@
+spring.application.name=tgsiren
+
+#DataSource
+spring.datasource.url=jdbc:h2:mem:SIREN_DATABASE_NAME
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=DATABASE_USER_NAME
+spring.datasource.password=DATABASE_PASSWORD
+spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
+
+# Show or not log for each sql query
+# Hibernate ddl auto (create, create-drop, update)
+spring.jpa.hibernate.ddl-auto = update
