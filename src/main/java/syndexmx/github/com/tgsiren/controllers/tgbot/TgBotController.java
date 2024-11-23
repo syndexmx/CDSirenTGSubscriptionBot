@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
+import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
 
 import java.util.List;
 
@@ -19,10 +20,12 @@ public class TgBotController extends TelegramLongPollingBot {
     final String BOT_TOKEN;
 
     final private WebMonitor webMonitor;
+    final private SubscriberService subscriberService;
 
     public TgBotController(@Value("${tg-bot.name}") String botName,
                            @Value("${tg-bot.token}") String botToken,
-                           @Autowired WebMonitor webMonitor) throws TelegramApiException {
+                           @Autowired WebMonitor webMonitor,
+                           @Autowired SubscriberService subscriberService) throws TelegramApiException {
         BOT_NAME = botName;
         BOT_TOKEN = botToken;
         this.webMonitor = webMonitor;
@@ -31,6 +34,7 @@ public class TgBotController extends TelegramLongPollingBot {
                 webMonitor.startMonitor();
             }
         };
+        this.subscriberService = subscriberService;
         backgroundThread.start();
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(this);
