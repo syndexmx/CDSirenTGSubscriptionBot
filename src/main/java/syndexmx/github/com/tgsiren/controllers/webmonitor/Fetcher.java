@@ -1,4 +1,4 @@
-package syndexmx.github.com.tgsiren.webmonitor;
+package syndexmx.github.com.tgsiren.controllers.webmonitor;
 
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
