@@ -1,5 +1,8 @@
 package syndexmx.github.com.tgsiren.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class HtmlBlockExtractor {
 
     static char Q_MARK = '"';
@@ -54,5 +57,17 @@ public class HtmlBlockExtractor {
             }
         }
         return extractedHtml.toString();
+    }
+
+    public static List<String> extractAllTaggedBlocks(String html, String tag, String className) {
+        List<String> list = new ArrayList<>();
+        StringBuffer htmlBuffer = new StringBuffer(html);
+        while (htmlBuffer.indexOf("<" + tag + " class=" + Q_MARK + className + Q_MARK) >= 0) {
+            String extractedBlock = extractTagedBlock(html, tag, className);
+            list.add(extractedBlock);
+            int startIndex = htmlBuffer.indexOf("<" + tag + " class=" + Q_MARK + className + Q_MARK);
+            htmlBuffer.delete(startIndex, startIndex + extractedBlock.length());
+        }
+        return list;
     }
 }

@@ -1,24 +1,20 @@
-package syndexmx.github.com.tgsiren.domain;
+package syndexmx.github.com.tgsiren.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@RequiredArgsConstructor
-@Data
+@Builder
 @Table(name = "subscribers")
 public class Subscriber {
 
     @Id
-            @Column(name = "id")
+            @Column(name = "subscriber_id")
     Long id;
 
 }
