@@ -1,31 +1,28 @@
 package syndexmx.github.com.tgsiren.entities;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Data
 @Builder
 @Table(name = "channels")
-public class Channel {
+public class Channel implements Serializable {
 
     @Id
-            @Column(name = "channel_id")
-    Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "channel_id")
+    private Long id;
 
     @Column(name = "channel_name")
-    String name;
+    private String name;
 
     @Column(name = "channel_url")
-    String url;
+    private String url;
 
-    @OneToMany
-    List<Filter> filters;
 }

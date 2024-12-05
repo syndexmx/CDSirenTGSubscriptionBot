@@ -2,8 +2,8 @@ package syndexmx.github.com.tgsiren.services.susbcribers.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import syndexmx.github.com.tgsiren.SubscriberRepository;
 import syndexmx.github.com.tgsiren.entities.Subscriber;
+import syndexmx.github.com.tgsiren.repositories.SubscriberRepository;
 import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
 
 import java.util.Optional;

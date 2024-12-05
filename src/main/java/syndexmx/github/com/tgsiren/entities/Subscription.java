@@ -4,22 +4,24 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "subscriptions")
-public class Subscription {
+public class Subscription implements Serializable {
 
     @Id
-            @Column(name = "subscription_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "subscription_id")
     Long id;
 
-    @OneToOne
-            @Column(name = "subscriber_reference")
+    @Column(name = "subscriber_ref")
     Subscriber subscriber;
 
-    @OneToOne
-            @Column(name = "channel_reference")
-    Channel channel;
+    @Column(name = "subscription_ref")
+    Subscription subscription;
+
 
 }

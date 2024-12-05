@@ -6,20 +6,22 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
 @Builder
 @Table (name = "filters")
-public class Filter {
+public class Filter implements Serializable {
 
     @Id
-            @Column(name = "filter_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JoinColumn(name = "filter_id", referencedColumnName = "channel_id")
     Long id;
 
-    @ManyToOne
-            @Column(name = "host_id")
+    @Column(name = "host_id")
     Channel hostId;
 
     @Column(name = "filter_string")
