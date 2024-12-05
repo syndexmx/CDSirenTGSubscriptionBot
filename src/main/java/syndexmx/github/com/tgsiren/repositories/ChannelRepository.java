@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ChannelRepository extends JpaRepository<Channel, Long> {
 
     @Query(
-            value = "SELECT * FROM channels ch WHERE ch.channel_url = ?1",
+            value = "SELECT * FROM channels ch WHERE ch.channel_name = ?1",
             nativeQuery = true)
-    Optional<Channel> findChannelByUrl(String url);
+    Optional<Channel> findChannelByUrl(String name);
 }

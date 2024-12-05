@@ -7,7 +7,7 @@ public class ChannelMapper {
 
     public Channel channelDtoToChannel(ChannelDto channelDto) {
         return Channel.builder()
-                .id(channelDto.getId())
+                //.id(channelDto.getId())
                 .name(channelDto.getName())
                 .url(channelDto.getUrl())
                 .build();

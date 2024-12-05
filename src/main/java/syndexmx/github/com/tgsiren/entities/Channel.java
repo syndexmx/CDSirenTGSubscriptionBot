@@ -15,7 +15,7 @@ import java.util.List;
 public class Channel implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "channel_id")
     private Long id;
 

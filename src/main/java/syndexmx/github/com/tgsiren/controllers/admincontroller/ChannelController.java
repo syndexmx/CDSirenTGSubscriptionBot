@@ -36,4 +36,10 @@ public class ChannelController {
         ResponseEntity response = new ResponseEntity(createdDto, HttpStatus.CREATED);
         return response;
     }
+
+    @GetMapping(path = "/api/v0/channels")
+    ResponseEntity<ChannelDto> listAllChannels() {
+        return new ResponseEntity(channelService.listAllChannels(), HttpStatus.OK);
+    }
+
 }
