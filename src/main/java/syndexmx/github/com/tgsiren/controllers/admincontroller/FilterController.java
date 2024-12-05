@@ -1,13 +1,49 @@
 package syndexmx.github.com.tgsiren.controllers.admincontroller;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import syndexmx.github.com.tgsiren.dto.ChannelDto;
+import syndexmx.github.com.tgsiren.dto.FilterDto;
+import syndexmx.github.com.tgsiren.dtomappers.FilterMapper;
+import syndexmx.github.com.tgsiren.entities.Filter;
+import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
+import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
+
+import java.util.Optional;
 
 @RestController
 @Slf4j
 @RequestMapping
 public class FilterController {
 
+    private final FilterService filterService;
+
+    FilterController(@Autowired FilterService filterService) {
+        this.filterService = filterService;
+    }
+
+    @PostMapping(path = "/api/v0/filters")
+    ResponseEntity<FilterDto> addFiler(@RequestBody FilterDto filterDto) {
+        FilterMapper filterMapper = new FilterMapper();
+        Filter filter = filterMapper.filterDtoToFilter(filterDto);
+        Optional<Filter> savedFilterOptional = filterService.addFilter(filter);
+        if (savedFilterOptional.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_MODIFIED);
+        }
+        FilterDto createdDto = filterMapper.filterToFilterDto(
+                savedFilterOptional.get());
+        ResponseEntity response = new ResponseEntity(createdDto, HttpStatus.CREATED);
+        return response;
+
+    }
+
+    @GetMapping(path = "/api/v0/filters")
+    ResponseEntity<FilterDto> listAllFilters() {
+        return new ResponseEntity(filterService.listAllFilters(), HttpStatus.OK);
+    }
 
 }

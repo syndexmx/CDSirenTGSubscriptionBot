@@ -17,12 +17,9 @@ import java.io.Serializable;
 public class Filter implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @JoinColumn(name = "filter_id", referencedColumnName = "channel_id")
     Long id;
-
-    @Column(name = "host_id")
-    Channel hostId;
 
     @Column(name = "filter_string")
     String filterString;

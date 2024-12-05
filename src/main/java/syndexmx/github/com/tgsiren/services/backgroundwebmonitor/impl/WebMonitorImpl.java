@@ -10,11 +10,13 @@ import syndexmx.github.com.tgsiren.controllers.webmonitor.Fetcher;
 import syndexmx.github.com.tgsiren.controllers.webmonitor.fetcherImpl.FetcherImpl;
 import syndexmx.github.com.tgsiren.domain.NewsFeedMessage;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
+import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockCutter.cutTagedBlockOut;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllTaggedBlocks;
@@ -29,15 +31,18 @@ public class WebMonitorImpl implements WebMonitor {
     private volatile boolean initiated = false;
     private WebSourcesConfig webSourcesConfig;
     private MessageFilterConfig messageFilterConfig;
+    private ChannelService channelService;
 
     WebMonitorImpl(@Autowired Fetcher fetcher,
                    @Value("${web-monitor.update-interval.ms}") Integer intervalValue,
                    @Autowired WebSourcesConfig webSourcesConfig,
-                   @Autowired MessageFilterConfig messageFilterConfig) {
+                   @Autowired MessageFilterConfig messageFilterConfig,
+                    @Autowired ChannelService channelService) {
         this.fetcher = fetcher;
         this.updateInterval = intervalValue;
         this.webSourcesConfig = webSourcesConfig;
         this.messageFilterConfig = messageFilterConfig;
+        this.channelService = channelService;
     }
 
     @Override
@@ -56,10 +61,12 @@ public class WebMonitorImpl implements WebMonitor {
     }
 
     private void scanWebSources() throws IOException {
-        Map<String, String> webSourcesMap = webSourcesConfig.getWebSourcesMap();
-        for (String sourceName : webSourcesMap.keySet())
+        List<String> urlChannelSet = channelService.listAllChannels().stream()
+                .map(channelDto -> {
+                    return channelDto.getUrl();
+                }).toList();
+        for (String url : urlChannelSet)
         {
-            String url = webSourcesMap.get(sourceName);
             String receivedNewsFeed =
                     cutTagedBlockOut(cutTagedBlockOut(cutTagedBlockOut(
                             extractTagedBlock(
@@ -72,6 +79,7 @@ public class WebMonitorImpl implements WebMonitor {
     }
 
     private void scanNewsFeed(String url, String receivedNewsFeed) {
+        log.info("Scanning " + url);
         List<String> filterList = messageFilterConfig.getFilerItems();
         List<String> blocks =
                 extractAllTaggedBlocks(receivedNewsFeed, "div", "tgme_widget_message_bubble");
@@ -80,7 +88,7 @@ public class WebMonitorImpl implements WebMonitor {
                     for (String string : filterList) {
                         if (block.indexOf(string) >= 0) return true;
                     }
-                    return false;
+                    return true; // Temporarily Disabled
                 })
                 .toList();
         System.out.println(filteredBlocks.toString());
