@@ -59,8 +59,8 @@ public class WebMonitorImpl implements WebMonitor {
                 }).toList();
         for (String url : urlChannelSet) {
             String receivedNewsFeed = fetcher.getPage(url).toString();
-            List<String> divList =
-                    extractAllClassedBlocks(receivedNewsFeed, "div", "tgme_widget_message_bubble");
+            List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
+                    "tgme_widget_message_wrap js-widget_message_wrap");
             System.out.println(divList.toString());
             scanNewsFeed(url, receivedNewsFeed);
         }

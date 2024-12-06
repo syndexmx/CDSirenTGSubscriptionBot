@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllClassedBlocks;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllTaggedBlocks;
 
 public class HtmlBlockExtractorTest {
@@ -19,6 +20,14 @@ public class HtmlBlockExtractorTest {
         assertTrue(list.size() > 0);
     }
 
+    String className = "tgme_widget_message_wrap";
+
+    @Test
+    void extractAllClassedBlocksPositiveTest() {
+        List<String> list = extractAllClassedBlocks(html, tag, className);
+        System.out.println(list.toString());
+        assertTrue(list.size() > 0);
+    }
 
     String html = """
              <div class="tgme_widget_message_wrap js-widget_message_wrap">
