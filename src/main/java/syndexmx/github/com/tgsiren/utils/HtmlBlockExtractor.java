@@ -95,13 +95,13 @@ public class HtmlBlockExtractor {
     }
 
     public static List<String> extractAllClassedBlocks(String html, String tag, String className) {
-        tag += " class=" + Q_MARK + className + Q_MARK;
+        String classedTag = tag + " class=" + Q_MARK + className + Q_MARK;
         List<String> list = new ArrayList<>();
         int position = 0;
-        while (position < html.length() && (html.indexOf("<" + tag + ">", position) >= 0) ||
-                html.indexOf("<" + tag + " ", position) >= 0) {
-            int nextTagOnlyIndex = html.indexOf("<" + tag + ">", position);
-            int nextTagWithProps = html.indexOf("<" + tag + " ", position);
+        while (position < html.length() && (html.indexOf("<" + classedTag + ">", position) >= 0) ||
+                html.indexOf("<" + classedTag + " ", position) >= 0) {
+            int nextTagOnlyIndex = html.indexOf("<" + classedTag + ">", position);
+            int nextTagWithProps = html.indexOf("<" + classedTag + " ", position);
             boolean isNextTagOnly = false;
             if (nextTagOnlyIndex >= 0 && nextTagOnlyIndex < nextTagWithProps) {
                 isNextTagOnly = true;
@@ -118,7 +118,7 @@ public class HtmlBlockExtractor {
             if (isNextTagWithProps) {
                 nextIndex = nextTagWithProps;
             }
-            String foundSection = findFirstSinceIndex(html, tag, nextIndex).toString();
+            String foundSection = findFirstClassedSinceIndex(html, tag, className, nextIndex).toString();
             list.add(foundSection);
             position = nextIndex + foundSection.length();
             position++;
@@ -128,18 +128,18 @@ public class HtmlBlockExtractor {
     }
 
     public static String findFirstClassedSinceIndex(String html, String tag, String className, int sinceIndex) {
-        tag += " class=" + Q_MARK + className + Q_MARK;
+        String classedTag = tag + " class=" + Q_MARK + className + Q_MARK;
         StringBuffer foundSection = new StringBuffer();
         int position = sinceIndex;
-        if (html.indexOf("<" + tag + ">", position) >= 0 ||
-                html.indexOf("<" + tag + " ", position) >= 0) {
-            position = html.indexOf("<" + tag + ">", position);
+        if (html.indexOf("<" + classedTag + ">", position) >= 0 ||
+                html.indexOf("<" + classedTag + " ", position) >= 0) {
+            position = html.indexOf("<" + classedTag + ">", position);
             if (position < 0) {
-                position = html.indexOf("<" + tag + " ", position);
+                position = html.indexOf("<" + classedTag + " ", position);
             };
-            if (html.indexOf("<" + tag + " ", position) > 0 &&
-                    position > html.indexOf("<" + tag + " ", position)) {
-                position = html.indexOf("<" + tag + " ", position);
+            if (html.indexOf("<" + classedTag + " ", position) > 0 &&
+                    position > html.indexOf("<" + classedTag + " ", position)) {
+                position = html.indexOf("<" + classedTag + " ", position);
             }
             int depth = 1;
             while (depth > 0 && position < html.length()) {
@@ -178,7 +178,6 @@ public class HtmlBlockExtractor {
             }
             return foundSection.toString();
         } else {
-            System.out.println("Empty return");
             return "";
         }
     }
