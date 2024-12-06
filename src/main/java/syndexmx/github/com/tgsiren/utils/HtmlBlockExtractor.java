@@ -52,10 +52,12 @@ public class HtmlBlockExtractor {
                     position > html.indexOf("<" + tag + " ", position)) {
                 position = html.indexOf("<" + tag + " ", position);
             }
-            int depth = 1;
-            while (depth > 0 && position < html.length()) {
-                int nextOpenning = Math.min(html.indexOf("<" + tag + ">", position),
-                                html.indexOf("<" + tag + " ", position));
+            int depth = 0;
+            do {
+                int nextOpenning = html.indexOf("<" + tag + ">", position);
+                if (nextOpenning < 0 || html.indexOf("<" + tag + " ", position) >= 0) {
+                    nextOpenning = html.indexOf("<" + tag + " ", position);
+                };
                 int nextClosing = html.indexOf("</" + tag + ">", position);
                 if (nextOpenning >= 0 && (nextOpenning < nextClosing ||
                         nextClosing < 0)) {
@@ -86,7 +88,7 @@ public class HtmlBlockExtractor {
                     }
                     depth--;
                 }
-            }
+            } while (depth > 0 && position < html.length());
             return foundSection.toString();
         } else {
             System.out.println("Empty return");

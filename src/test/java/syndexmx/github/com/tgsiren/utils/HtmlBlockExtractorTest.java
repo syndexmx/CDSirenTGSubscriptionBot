@@ -20,7 +20,7 @@ public class HtmlBlockExtractorTest {
         assertTrue(list.size() > 0);
     }
 
-    String className = "tgme_widget_message_wrap";
+    String className = "tgme_widget_message_bubble";
 
     @Test
     void extractAllClassedBlocksPositiveTest() {

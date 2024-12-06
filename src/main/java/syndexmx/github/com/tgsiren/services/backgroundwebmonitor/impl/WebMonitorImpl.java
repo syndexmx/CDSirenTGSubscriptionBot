@@ -61,26 +61,26 @@ public class WebMonitorImpl implements WebMonitor {
             String receivedNewsFeed = fetcher.getPage(url).toString();
             List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
                     "tgme_widget_message_wrap js-widget_message_wrap");
-            System.out.println(divList.toString());
-            scanNewsFeed(url, receivedNewsFeed);
+            divList.forEach(foundSection -> {scanNewsFeed(foundSection);});
         }
     }
 
-    private void scanNewsFeed(String url, String receivedNewsFeed) {
-        log.info("Scanning " + url);
+    private void scanNewsFeed(String receivedNewsFeed) {
+        log.info("Scanning ");
         List<String> filterList = filterService.listAllFilters().stream()
                 .map(filterDto -> {
                         return filterDto.getFilterString();
                          })
                 .toList();
         List<String> blocks =
-                extractAllClassedBlocks(receivedNewsFeed, "div", "tgme_widget_message_bubble");
+                extractAllClassedBlocks(receivedNewsFeed, "div",
+                        "tgme_widget_message_text js-message_text");
         List<String> filteredBlocks = blocks.stream()
                 .filter(block -> {
                     for (String string : filterList) {
                         if (block.indexOf(string) >= 0) return true;
                     }
-                    return false; // Temporarily Disabled
+                    return false;
                 })
                 .toList();
         System.out.println(blocks.toString());
