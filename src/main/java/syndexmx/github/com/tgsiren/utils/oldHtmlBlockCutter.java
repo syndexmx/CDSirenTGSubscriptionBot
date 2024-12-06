@@ -1,6 +1,6 @@
 package syndexmx.github.com.tgsiren.utils;
 
-public class HtmlBlockCutter {
+public class oldHtmlBlockCutter {
 
     public static String cutTagedBlockOut(String html, String tag) {
         StringBuffer trimmed = new StringBuffer(html);
