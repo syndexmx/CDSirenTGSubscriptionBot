@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import syndexmx.github.com.tgsiren.dto.ChannelDto;
-import syndexmx.github.com.tgsiren.dtomappers.ChannelMapper;
+import syndexmx.github.com.tgsiren.dto.dtomappers.ChannelMapper;
 import syndexmx.github.com.tgsiren.entities.Channel;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 

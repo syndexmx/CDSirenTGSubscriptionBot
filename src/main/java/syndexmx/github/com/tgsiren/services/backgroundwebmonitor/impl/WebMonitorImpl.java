@@ -4,8 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import syndexmx.github.com.tgsiren.controllers.webmonitor.Fetcher;
+import syndexmx.github.com.tgsiren.controllers.webfetcher.Fetcher;
 import syndexmx.github.com.tgsiren.entities.FeedMessage;
+import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.NotificationService;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
@@ -29,17 +30,20 @@ public class WebMonitorImpl implements WebMonitor {
     private ChannelService channelService;
     private FilterService filterService;
     private FeedMessageService feedMessageService;
+    private NotificationService notificationService;
 
     WebMonitorImpl(@Autowired Fetcher fetcher,
                    @Value("${web-monitor.update-interval.ms}") Integer intervalValue,
                     @Autowired ChannelService channelService,
                    @Autowired FilterService filterService,
+                   @Autowired NotificationService notificationService,
                     @Autowired FeedMessageService feedMessageService) {
         this.fetcher = fetcher;
         this.updateInterval = intervalValue;
         this.channelService = channelService;
         this.filterService = filterService;
         this.feedMessageService = feedMessageService;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -87,7 +91,7 @@ public class WebMonitorImpl implements WebMonitor {
         if (!match) return;
         String footerBlock = extractAllClassedBlocks(block,
                 "a", "tgme_widget_message_date").toString();
-        String footerText = "\n\n **" + deTag(footerBlock) + "**";
+        String footerText = "\n " + deTag(footerBlock + " ");
         String textBlock = deTag(extractAllClassedBlocks(block,
                 "div", "tgme_widget_message_text js-message_text").toString());
         if (textBlock.length() > 224) {
@@ -103,13 +107,9 @@ public class WebMonitorImpl implements WebMonitor {
         if (savedMessage.isEmpty()) {
             return;
         }
-        notifyAllInterested(url, savedMessage.get());
+        notificationService.notifyAllInterested(url, savedMessage.get());
     };
 
-    private void notifyAllInterested(String url, FeedMessage feedMessage) {
-        // TODO
-        log.info("New message \n\n" + feedMessage.toString() + "\n\n");
-    }
 
     private void goToSleep() {
         try {

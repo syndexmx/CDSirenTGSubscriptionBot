@@ -3,7 +3,7 @@ package syndexmx.github.com.tgsiren.services.filterservices.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import syndexmx.github.com.tgsiren.dto.FilterDto;
-import syndexmx.github.com.tgsiren.dtomappers.FilterMapper;
+import syndexmx.github.com.tgsiren.dto.dtomappers.FilterMapper;
 import syndexmx.github.com.tgsiren.entities.Filter;
 import syndexmx.github.com.tgsiren.repositories.FilterRepository;
 import syndexmx.github.com.tgsiren.services.filterservices.FilterService;

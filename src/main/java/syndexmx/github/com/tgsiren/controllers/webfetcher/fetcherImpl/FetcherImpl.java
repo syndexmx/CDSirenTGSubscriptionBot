@@ -1,9 +1,9 @@
-package syndexmx.github.com.tgsiren.controllers.webmonitor.fetcherImpl;
+package syndexmx.github.com.tgsiren.controllers.webfetcher.fetcherImpl;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Service;
-import syndexmx.github.com.tgsiren.controllers.webmonitor.Fetcher;
+import syndexmx.github.com.tgsiren.controllers.webfetcher.Fetcher;
 
 import java.io.IOException;
 import java.net.URL;

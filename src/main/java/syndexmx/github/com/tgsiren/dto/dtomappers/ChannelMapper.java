@@ -1,4 +1,4 @@
-package syndexmx.github.com.tgsiren.dtomappers;
+package syndexmx.github.com.tgsiren.dto.dtomappers;
 
 import syndexmx.github.com.tgsiren.dto.ChannelDto;
 import syndexmx.github.com.tgsiren.entities.Channel;

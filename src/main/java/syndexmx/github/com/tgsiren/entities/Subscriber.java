@@ -8,12 +8,12 @@ import java.io.Serializable;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Builder
 @Table(name = "subscribers")
 public class Subscriber implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
             @Column(name = "subscriber_id")
     Long id;
 
