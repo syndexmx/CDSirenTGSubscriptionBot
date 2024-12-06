@@ -5,15 +5,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import syndexmx.github.com.tgsiren.controllers.webmonitor.Fetcher;
+import syndexmx.github.com.tgsiren.entities.FeedMessage;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
+import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
 import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
+import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.deTag;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllClassedBlocks;
-import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllTaggedBlocks;
 
 
 @Service
@@ -25,15 +28,18 @@ public class WebMonitorImpl implements WebMonitor {
     private volatile boolean initiated = false;
     private ChannelService channelService;
     private FilterService filterService;
+    private FeedMessageService feedMessageService;
 
     WebMonitorImpl(@Autowired Fetcher fetcher,
                    @Value("${web-monitor.update-interval.ms}") Integer intervalValue,
                     @Autowired ChannelService channelService,
-                   @Autowired FilterService filterService) {
+                   @Autowired FilterService filterService,
+                    @Autowired FeedMessageService feedMessageService) {
         this.fetcher = fetcher;
         this.updateInterval = intervalValue;
         this.channelService = channelService;
         this.filterService = filterService;
+        this.feedMessageService = feedMessageService;
     }
 
     @Override
@@ -61,30 +67,49 @@ public class WebMonitorImpl implements WebMonitor {
             String receivedNewsFeed = fetcher.getPage(url).toString();
             List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
                     "tgme_widget_message_wrap js-widget_message_wrap");
-            divList.forEach(foundSection -> {scanNewsFeed(foundSection);});
+            divList.forEach(foundSection -> {
+                scanBlockForFilterMatch(url, foundSection);});
         }
     }
 
-    private void scanNewsFeed(String receivedNewsFeed) {
-        log.info("Scanning ");
+    private void scanBlockForFilterMatch(String url, String block) {
         List<String> filterList = filterService.listAllFilters().stream()
                 .map(filterDto -> {
                         return filterDto.getFilterString();
                          })
                 .toList();
-        List<String> blocks =
-                extractAllClassedBlocks(receivedNewsFeed, "div",
-                        "tgme_widget_message_text js-message_text");
-        List<String> filteredBlocks = blocks.stream()
-                .filter(block -> {
-                    for (String string : filterList) {
-                        if (block.indexOf(string) >= 0) return true;
-                    }
-                    return false;
-                })
-                .toList();
-        System.out.println(blocks.toString());
+        boolean match = false;
+        for (String filter : filterList) {
+            if (block.contains(filter)) {
+                match = true;
+            }
+        }
+        if (!match) return;
+        String footerBlock = extractAllClassedBlocks(block,
+                "a", "tgme_widget_message_date").toString();
+        String footerText = "\n\n **" + deTag(footerBlock) + "**";
+        String textBlock = deTag(extractAllClassedBlocks(block,
+                "div", "tgme_widget_message_text js-message_text").toString());
+        if (textBlock.length() > 224) {
+            textBlock = textBlock.substring(0, 224);
+        }
+        String text = textBlock + "\n" + footerText;
+        FeedMessage feedMessage = FeedMessage.builder()
+                .footer(footerBlock)
+                .owner(url)
+                .text(text)
+                .build();
+        Optional<FeedMessage> savedMessage = feedMessageService.addMessage(feedMessage);
+        if (savedMessage.isEmpty()) {
+            return;
+        }
+        notifyAllInterested(url, savedMessage.get());
     };
+
+    private void notifyAllInterested(String url, FeedMessage feedMessage) {
+        // TODO
+        log.info("New message \n\n" + feedMessage.toString() + "\n\n");
+    }
 
     private void goToSleep() {
         try {

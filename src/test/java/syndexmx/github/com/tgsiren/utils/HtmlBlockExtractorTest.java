@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllClassedBlocks;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllTaggedBlocks;
@@ -25,6 +26,16 @@ public class HtmlBlockExtractorTest {
     @Test
     void extractAllClassedBlocksPositiveTest() {
         List<String> list = extractAllClassedBlocks(html, tag, className);
+        list = list.stream().map(string -> string + "\n\n   ***   \n\n\n").toList();
+        System.out.println(list.toString());
+        assertTrue(list.size() > 0);
+    }
+
+
+    @Test
+    void extractAllClassedBlocksWidgetMessageMetaTest() {
+        List<String> list = extractAllClassedBlocks(html, tag, "tgme_widget_message_meta");
+        list = list.stream().map(string -> {return string + "\n\n   ***   \n\n\n";}).toList();
         System.out.println(list.toString());
         assertTrue(list.size() > 0);
     }

@@ -5,7 +5,9 @@ import java.util.List;
 
 public class HtmlBlockExtractor {
 
+
     static char Q_MARK = '"';
+
 
     public static List<String> extractAllTaggedBlocks(String html, String tag) {
         List<String> list = new ArrayList<>();
@@ -30,7 +32,7 @@ public class HtmlBlockExtractor {
             if (isNextTagWithProps) {
                 nextIndex = nextTagWithProps;
             }
-            String foundSection = findFirstSinceIndex(html, tag, nextIndex).toString();
+            String foundSection = extractFirstSinceIndex(html, tag, nextIndex).toString();
             list.add(foundSection);
             position = nextIndex + foundSection.length();
             position++;
@@ -39,82 +41,76 @@ public class HtmlBlockExtractor {
         return list;
     }
 
-    public static String findFirstSinceIndex(String html, String tag, int sinceIndex) {
+    public static String extractFirstSinceIndex(String html, String tag, int sinceIndex) {
         StringBuffer foundSection = new StringBuffer();
         int position = sinceIndex;
-        if (html.indexOf("<" + tag + ">", position) >= 0 ||
-                html.indexOf("<" + tag + " ", position) >= 0) {
-            position = html.indexOf("<" + tag + ">", position);
-            if (position < 0) {
-                position = html.indexOf("<" + tag + " ", position);
-                };
-            if (html.indexOf("<" + tag + " ", position) > 0 &&
-                    position > html.indexOf("<" + tag + " ", position)) {
-                position = html.indexOf("<" + tag + " ", position);
-            }
-            int depth = 0;
-            do {
-                int nextOpenning = html.indexOf("<" + tag + ">", position);
-                if (nextOpenning < 0 || html.indexOf("<" + tag + " ", position) >= 0) {
-                    nextOpenning = html.indexOf("<" + tag + " ", position);
-                };
-                int nextClosing = html.indexOf("</" + tag + ">", position);
-                if (nextOpenning >= 0 && (nextOpenning < nextClosing ||
-                        nextClosing < 0)) {
-                    foundSection.append(html.substring(position, nextOpenning));
-                    if (nextOpenning < html.length()) {
-                        foundSection.append(html.charAt(nextOpenning));
-                        position = nextOpenning;
-                        foundSection.append(html.charAt(position));
-                        position++;
+        int depth = 0;
+        do {
+            int nextOpenning = html.indexOf("<" + tag, position + 1);
+            int nextClosing = html.indexOf("</" + tag + ">", position );
+            if (nextOpenning >= 0 & nextOpenning < nextClosing) {
+                foundSection.append(html.substring(position, nextOpenning));
+                position = nextOpenning;
+                depth++;
+            } else {
+                if (nextClosing >= 0) {
+                    String stringBeforeClosingTag = html.substring(position, nextClosing);
+                    foundSection.append(stringBeforeClosingTag);
+                    while (html.charAt(nextClosing) != '>') {
+                        foundSection.append(html.charAt(nextClosing++));
                     }
-                    depth++;
-                } else {
-                    if (nextClosing >= 0) {
-                        String stringAddition = html.substring(position, nextClosing);
-                        foundSection.append(stringAddition);
-                        while (html.charAt(nextClosing) != '>') {
-                            foundSection.append(html.charAt(nextClosing));
-                            nextClosing++;
-                        }
-                        if (html.charAt(nextClosing) == '>') {
-                            foundSection.append(html.charAt(nextClosing));
-                            nextClosing++;
-                        }
-                        position = nextClosing;
-                    } else {
-                        foundSection.append(html.substring(position));
-                        position = html.length();
+                    if (html.charAt(nextClosing) == '>') {
+                        foundSection.append(html.charAt(nextClosing++));
                     }
+                    position = nextClosing;
                     depth--;
+                } else {
+                    foundSection.append(html.substring(position));
+                    position = html.length();
+                    depth = 0;
                 }
-            } while (depth > 0 && position < html.length());
-            return foundSection.toString();
-        } else {
-            System.out.println("Empty return");
-            return "";
-        }
+            }
+        } while (depth > 0 & position < html.length());
+        return foundSection.toString();
     }
 
     public static List<String> extractAllClassedBlocks(String html, String tag, String className) {
         String classedTag = tag + " class=" + Q_MARK + className + Q_MARK;
         List<String> list = new ArrayList<>();
         int position = 0;
-        while (position < html.length() && (html.indexOf("<" + classedTag, position) >= 0)) {
+        while (position < html.length() & (html.indexOf("<" + classedTag, position) >= 0)) {
             int nextIndex = html.indexOf("<" + classedTag, position);
-            boolean isNextTagOnly = false;
-            if (nextIndex >= 0) {
-                isNextTagOnly = true;
-            }
-            if (!isNextTagOnly) {
-                continue;
-            }
-            String foundSection = findFirstSinceIndex(html, tag, nextIndex).toString();
+            String foundSection = extractFirstSinceIndex(html, tag, nextIndex).toString();
             list.add(foundSection);
             position = nextIndex + foundSection.length();
-            position++;
         }
         return list;
+    }
+
+    public static List<String> extractAllTaggedBlocksWithProperty(String html, String tag, String property) {
+        List<String> list = new ArrayList<>();
+            //TODO
+        return list;
+    }
+
+    public static String deTag(String html) {
+        StringBuffer stringBuffer = new StringBuffer();
+        boolean tagOn = false;
+        for (int i = 0; i < html.length(); i++) {
+            if (!tagOn) {
+                if (html.charAt(i) == '<') {
+                    tagOn = true;
+                } else {
+                    stringBuffer.append(html.charAt(i));
+                }
+            } else {
+                if (html.charAt(i) == '>') {
+                    tagOn = false;
+                }
+            }
+
+        }
+        return stringBuffer.toString();
     }
 
 }
