@@ -94,17 +94,22 @@ public class HtmlBlockExtractor {
     }
 
     public static String deTag(String html) {
+        String htmlDeEmojized = new String(html);
+        while (htmlDeEmojized.contains("<tg-emoji") && htmlDeEmojized.contains("</tg-emoji>")) {
+            htmlDeEmojized = htmlDeEmojized.substring(0, htmlDeEmojized.indexOf("<tg-emoji")) + htmlDeEmojized.substring(htmlDeEmojized.indexOf("</tg-emoji>") + 12);
+        }
+        htmlDeEmojized = htmlDeEmojized.replaceAll("  ", " ").replaceAll("  ", " ").replaceAll("  ", " ");
         StringBuffer stringBuffer = new StringBuffer();
         boolean tagOn = false;
-        for (int i = 0; i < html.length(); i++) {
+        for (int i = 0; i < htmlDeEmojized.length(); i++) {
             if (!tagOn) {
-                if (html.charAt(i) == '<') {
+                if (htmlDeEmojized.charAt(i) == '<') {
                     tagOn = true;
                 } else {
-                    stringBuffer.append(html.charAt(i));
+                    stringBuffer.append(htmlDeEmojized.charAt(i));
                 }
             } else {
-                if (html.charAt(i) == '>') {
+                if (htmlDeEmojized.charAt(i) == '>') {
                     tagOn = false;
                 }
             }

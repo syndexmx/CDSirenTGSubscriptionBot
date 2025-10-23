@@ -3,6 +3,7 @@ spring.application.name=tgsiren
 tg-bot.name=TG_BOT_NAME
 tg-bot.token=TG_BOT_TOKEN_TOKEN
 
+admin-token=ADMIN_TOKEN
 
 #DataSource
 spring.datasource.url=jdbc:h2:mem:SIREN_DATABASE_NAME
@@ -15,5 +16,6 @@ spring.jpa.database-platform=org.hibernate.dialect.H2Dialect
 # Hibernate ddl auto (create, create-drop, update)
 spring.jpa.hibernate.ddl-auto = update
 
+spring.lifecycle.timeout-per-shutdown-phase=30s
 
 web-monitor.update-interval.ms=10000

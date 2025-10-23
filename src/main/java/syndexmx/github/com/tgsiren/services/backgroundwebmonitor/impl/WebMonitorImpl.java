@@ -11,6 +11,7 @@ import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
 import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
+import syndexmx.github.com.tgsiren.utils.Colorer;
 
 import java.io.IOException;
 import java.util.List;
@@ -50,33 +51,53 @@ public class WebMonitorImpl implements WebMonitor {
     public void startMonitor() {
         if (initiated) return;
         initiated = true;
-        log.info("Monitor service started");
+        log.info(Colorer.decorate("<white>Мониторинг запущен</>"));
+        int cycle = 0;
         while (true) {
             try {
+                if (cycle % 360 == 0) {
+                    log.info(Colorer.decorate("<gray>Онлайн</>"));
+                }
+                //log.info(Colorer.decorate("<gray>Запланированный вызов</>"));
                 scanWebSources();
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                // throw new RuntimeException(e);
+                log.error("Ошибка обращения к сети: " + e.getMessage());
+                try {
+                    Thread.sleep(60_000);
+                } catch (Exception sleepException) {
+                }
+                //e.printStackTrace();
             }
             goToSleep();
+            cycle++;
         }
     }
 
     private void scanWebSources() throws IOException {
-        log.info("scanWebSources");
-        List<String> urlChannelSet = channelService.listAllChannels().stream()
-                .map(channelDto -> {
-                    return channelDto.getUrl();
-                }).toList();
-        for (String url : urlChannelSet) {
-            String receivedNewsFeed = fetcher.getPage(url).toString();
-            List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
-                    "tgme_widget_message_wrap js-widget_message_wrap");
-            divList.forEach(foundSection -> {
-                scanBlockForFilterMatch(url, foundSection);});
+        try {
+            //log.info(Colorer.decorate("<gray>Сканирование каналов ..."));
+            List<String> urlChannelSet = channelService.listAllChannels().stream()
+                    .map(channelDto -> {
+                        return channelDto.getUrl();
+                    }).toList();
+            for (String url : urlChannelSet) {
+                String receivedNewsFeed = fetcher.getPage(url).toString();
+                List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
+                        "tgme_widget_message_wrap js-widget_message_wrap");
+                divList.forEach(foundSection -> {
+                    scanBlockForFilterMatch(url, foundSection);
+                });
+            }
+        } catch (RuntimeException exception) {
+            log.error(Colorer.decorate("<scarlet>Error occured" + exception.toString() + "</>"));
+            exception.printStackTrace();
         }
+
     }
 
     private void scanBlockForFilterMatch(String url, String block) {
+        //log.info(Colorer.decorate("<cyan>" + block + "</>"));
         List<String> filterList = filterService.listAllFilters().stream()
                 .map(filterDto -> {
                         return filterDto.getFilterString();
@@ -89,17 +110,21 @@ public class WebMonitorImpl implements WebMonitor {
             }
         }
         if (!match) return;
-        String footerBlock = extractAllClassedBlocks(block,
+        //log.info(Colorer.decorate("<cyan>" + block + "</>"));
+        String footerBlock = extractAllClassedBlocks(block.replace("+00:00","-GMT+03:00"),
                 "a", "tgme_widget_message_date").toString();
-        String footerText = "\n " + deTag(footerBlock + " ");
+        String footerText = "\n " + deTag(footerBlock + "GMT + 3:00 часа для МСК");
         String textBlock = deTag(extractAllClassedBlocks(block,
                 "div", "tgme_widget_message_text js-message_text").toString());
-        if (textBlock.length() > 224) {
-            textBlock = textBlock.substring(0, 224);
+        if (textBlock.length() > 4072) {
+            textBlock = textBlock.substring(0, 4072);
         }
+        //log.info(Colorer.decorate("<magenta>Выявлено совпадение с фильтром</>: <cyan>" + textBlock + "</>"));
         String text = textBlock + "\n" + footerText;
         FeedMessage feedMessage = FeedMessage.builder()
-                .footer(footerBlock)
+                .footer(footerBlock
+                        .replace(" class=" + '"' + "tgme_widget_message_date" + '"', "")
+                        .replace(" class=" + '"' + "time" + '"', ""))
                 .owner(url)
                 .text(text)
                 .build();
@@ -107,6 +132,7 @@ public class WebMonitorImpl implements WebMonitor {
         if (savedMessage.isEmpty()) {
             return;
         }
+        //log.info(Colorer.decorate("<magenta>Новое сообщение</>: <cyan>" + feedMessage + "</>"));
         notificationService.notifyAllInterested(url, savedMessage.get());
     };
 

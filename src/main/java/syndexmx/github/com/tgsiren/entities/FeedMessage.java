@@ -25,7 +25,7 @@ public class FeedMessage implements Serializable {
     @Column(name = "footer")
     String footer;
 
-    @Column(name = "text")
+    @Column(name = "text", length = 4095)
     String text;
 
     @Column(name = "owner")

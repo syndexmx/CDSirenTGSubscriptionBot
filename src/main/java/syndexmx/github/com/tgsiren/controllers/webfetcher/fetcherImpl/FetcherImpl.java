@@ -12,7 +12,7 @@ import java.net.URL;
 public class FetcherImpl implements Fetcher {
 
     public Document getPage(String url) throws IOException {
-        Document page = Jsoup.parse(new URL(url), 3000);
+        Document page = Jsoup.parse(new URL(url), 5000);
         return page;
     }
 }

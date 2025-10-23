@@ -2,6 +2,7 @@ package syndexmx.github.com.tgsiren.controllers.admincontroller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,8 +24,13 @@ public class ChannelController {
         this.channelService = channelService;
     }
 
+    @Value("${admin-token}")
+    private String adminToken;
+
     @PostMapping(path = "/api/v0/channels")
-    ResponseEntity<String> addChannel(@RequestBody ChannelDto channelDto) {
+    ResponseEntity<String> addChannel(@RequestBody ChannelDto channelDto, @RequestParam String token) {
+        if (token == null) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (!token.equals(adminToken)) return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         ChannelMapper channelMapper = new ChannelMapper();
         Channel channel = channelMapper.channelDtoToChannel(channelDto);
         Optional<Channel> savedChannelOptional = channelService.addChannel(channel);
