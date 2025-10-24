@@ -1,5 +1,6 @@
 package syndexmx.github.com.tgsiren.services.backgroundwebmonitor.impl;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,8 +15,15 @@ import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
 import syndexmx.github.com.tgsiren.utils.Colorer;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.deTag;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllClassedBlocks;
@@ -47,22 +55,35 @@ public class WebMonitorImpl implements WebMonitor {
         this.notificationService = notificationService;
     }
 
+    @PostConstruct
+    public void init() {
+        Thread thread = new Thread(() -> startMonitor());
+        thread.start();
+
+    }
+
     @Override
     public void startMonitor() {
         if (initiated) return;
         initiated = true;
-        log.info(Colorer.decorate("<white>Мониторинг запущен</>"));
+        log.info(Colorer.decorate("<white>Monitoring is running</>"));
+        FeedMessage startingFeedMessage = FeedMessage.builder()
+                .text("Сервис перезапущен и снова онлайн. \n Вы снова будете получать уведомления. \n" +
+                        LocalDateTime.now().toString().replace("T", " "))
+                .footer(LocalDateTime.now().toString())
+                .build();
+        notificationService.notifyAllInterested("Tg Bot", startingFeedMessage );
         int cycle = 0;
         while (true) {
             try {
                 if (cycle % 360 == 0) {
-                    log.info(Colorer.decorate("<gray>Онлайн</>"));
+                    log.info(Colorer.decorate("<gray>On-line</>"));
                 }
                 //log.info(Colorer.decorate("<gray>Запланированный вызов</>"));
                 scanWebSources();
             } catch (IOException e) {
                 // throw new RuntimeException(e);
-                log.error("Ошибка обращения к сети: " + e.getMessage());
+                log.error("HTTPS connection error: " + e.getMessage());
                 try {
                     Thread.sleep(60_000);
                 } catch (Exception sleepException) {
@@ -76,7 +97,6 @@ public class WebMonitorImpl implements WebMonitor {
 
     private void scanWebSources() throws IOException {
         try {
-            //log.info(Colorer.decorate("<gray>Сканирование каналов ..."));
             List<String> urlChannelSet = channelService.listAllChannels().stream()
                     .map(channelDto -> {
                         return channelDto.getUrl();
@@ -97,7 +117,6 @@ public class WebMonitorImpl implements WebMonitor {
     }
 
     private void scanBlockForFilterMatch(String url, String block) {
-        //log.info(Colorer.decorate("<cyan>" + block + "</>"));
         List<String> filterList = filterService.listAllFilters().stream()
                 .map(filterDto -> {
                         return filterDto.getFilterString();
@@ -110,17 +129,39 @@ public class WebMonitorImpl implements WebMonitor {
             }
         }
         if (!match) return;
-        //log.info(Colorer.decorate("<cyan>" + block + "</>"));
-        String footerBlock = extractAllClassedBlocks(block.replace("+00:00","-GMT+03:00"),
-                "a", "tgme_widget_message_date").toString();
-        String footerText = "\n " + deTag(footerBlock + "GMT + 3:00 часа для МСК");
+        //String footerBlock = extractAllClassedBlocks(block.replace("+00:00","-GMT+03:00"),
+        //        "a", "tgme_widget_message_date").toString();
+        String footerBlock = extractAllClassedBlocks(block,"a", "tgme_widget_message_date").toString();
+        Pattern pattern = Pattern.compile("href=\"([^\"]+)\"");
+        Matcher matcher = pattern.matcher(footerBlock);
+        String footerText = "";
+        if (matcher.find()) {
+            String link = matcher.group(1);
+            footerText = link;
+        }
+        Pattern dateTimePattern = Pattern.compile("datetime=\"([^\"]+)\"");
+        Matcher dateTimeMatcher = dateTimePattern.matcher(footerBlock);
+
+        if (dateTimeMatcher.find()) {
+            String datetimeString = dateTimeMatcher.group(1);
+
+            // Parse to LocalDateTime and convert to GMT+3
+            LocalDateTime utcDateTime = LocalDateTime.parse(datetimeString, DateTimeFormatter.ISO_DATE_TIME);
+            ZonedDateTime gmtPlus3DateTime = utcDateTime.atZone(ZoneOffset.UTC)
+                    .withZoneSameInstant(ZoneId.of("Europe/Moscow")); // GMT+3
+
+            footerText += "\n" +  gmtPlus3DateTime.toString()
+                    .replace("T", " ")
+                    .replace("+", "  Moscow/МСК (UTC+")
+                    .replace("[Europe/Moscow]", ")");
+        }
         String textBlock = deTag(extractAllClassedBlocks(block,
                 "div", "tgme_widget_message_text js-message_text").toString());
         if (textBlock.length() > 4072) {
             textBlock = textBlock.substring(0, 4072);
         }
-        //log.info(Colorer.decorate("<magenta>Выявлено совпадение с фильтром</>: <cyan>" + textBlock + "</>"));
-        String text = textBlock + "\n" + footerText;
+        String text = textBlock + "\n\n" + footerText;
+        //text = text.replaceAll("\\s+", " ");
         FeedMessage feedMessage = FeedMessage.builder()
                 .footer(footerBlock
                         .replace(" class=" + '"' + "tgme_widget_message_date" + '"', "")
@@ -132,7 +173,6 @@ public class WebMonitorImpl implements WebMonitor {
         if (savedMessage.isEmpty()) {
             return;
         }
-        //log.info(Colorer.decorate("<magenta>Новое сообщение</>: <cyan>" + feedMessage + "</>"));
         notificationService.notifyAllInterested(url, savedMessage.get());
     };
 

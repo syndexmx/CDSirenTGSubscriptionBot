@@ -35,7 +35,7 @@ public class ChannelServiceImpl implements ChannelService {
             return existingChannel;
         } else {
             Channel savedChannel = channelRepository.save(inChannel);
-            log.info(Colorer.decorate("<white>Добавлен канал</> \n<bright-cyan>" + savedChannel.toString() + "</>"));
+            log.info(Colorer.decorate("<white>Channel is added</>: <bright-cyan>" + savedChannel.getName() + "</> <purple>" + savedChannel.getUrl() + "</>"));
             try {
                 Thread thread = new Thread(() -> { webMonitor.startMonitor(); });
                 thread.start();

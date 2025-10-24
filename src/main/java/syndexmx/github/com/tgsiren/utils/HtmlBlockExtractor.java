@@ -94,11 +94,31 @@ public class HtmlBlockExtractor {
     }
 
     public static String deTag(String html) {
-        String htmlDeEmojized = new String(html);
-        while (htmlDeEmojized.contains("<tg-emoji") && htmlDeEmojized.contains("</tg-emoji>")) {
-            htmlDeEmojized = htmlDeEmojized.substring(0, htmlDeEmojized.indexOf("<tg-emoji")) + htmlDeEmojized.substring(htmlDeEmojized.indexOf("</tg-emoji>") + 12);
+        StringBuffer htmlDeEmojized = new StringBuffer(html);
+        int startIndex;
+        while ((startIndex = htmlDeEmojized.indexOf("<tg-emoji")) != -1) {
+            int endIndex = htmlDeEmojized.indexOf("</tg-emoji>", startIndex);
+            if (endIndex != -1) {
+                htmlDeEmojized.delete(startIndex, endIndex + 11);
+            } else {
+                break;
+            }
         }
-        htmlDeEmojized = htmlDeEmojized.replaceAll("  ", " ").replaceAll("  ", " ").replaceAll("  ", " ");
+        StringBuffer normalized = new StringBuffer();
+        boolean lastWasSpace = false;
+        for (int i = 0; i < htmlDeEmojized.length(); i++) {
+            char c = htmlDeEmojized.charAt(i);
+            if (c == ' ') {
+                if (!lastWasSpace) {
+                    normalized.append(c);
+                    lastWasSpace = true;
+                }
+            } else {
+                normalized.append(c);
+                lastWasSpace = false;
+            }
+        }
+        String result = normalized.toString();
         StringBuffer stringBuffer = new StringBuffer();
         boolean tagOn = false;
         for (int i = 0; i < htmlDeEmojized.length(); i++) {
@@ -113,7 +133,6 @@ public class HtmlBlockExtractor {
                     tagOn = false;
                 }
             }
-
         }
         return stringBuffer.toString();
     }

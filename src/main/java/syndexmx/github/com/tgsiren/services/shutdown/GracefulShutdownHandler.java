@@ -30,11 +30,11 @@ public class GracefulShutdownHandler {
 
     private void sendSimpleNotification() {
         FeedMessage feedMessage = FeedMessage.builder()
-                .text("Сервис сейчас останавливается. В случае возобновления работы вам нужно будет снова подписаться на уведомления в боте")
+                .text("Сервис сейчас останавливается. \n В случае возобновления работы вам нужно будет снова подписаться на уведомления в боте. \n До встречи!")
                 .footer(LocalDateTime.now().toString().replace("T", " "))
                 .owner("Пока!")
                 .build();
         notificationService.notifyAllInterested("*", feedMessage );
-        log.info(Colorer.decorate("<magenta>Подписчики уведомлены об остановке сервиса</>"));
+        log.info(Colorer.decorate("<magenta>Subscribers are informed about service termination</>"));
     }
 }

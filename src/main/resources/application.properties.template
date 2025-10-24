@@ -6,7 +6,7 @@ tg-bot.token=TG_BOT_TOKEN_TOKEN
 admin-token=ADMIN_TOKEN
 
 #DataSource
-spring.datasource.url=jdbc:h2:mem:SIREN_DATABASE_NAME
+spring.datasource.url=jdbc:h2:file:./data/siren_database;DB_CLOSE_ON_EXIT=FALSE
 spring.datasource.driverClassName=org.h2.Driver
 spring.datasource.username=DATABASE_USER_NAME
 spring.datasource.password=DATABASE_PASSWORD

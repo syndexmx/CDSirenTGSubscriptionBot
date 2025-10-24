@@ -1,5 +1,6 @@
 package syndexmx.github.com.tgsiren.services.susbcribers.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -8,18 +9,25 @@ import syndexmx.github.com.tgsiren.dto.ChannelDto;
 import syndexmx.github.com.tgsiren.entities.Channel;
 import syndexmx.github.com.tgsiren.entities.FeedMessage;
 import syndexmx.github.com.tgsiren.entities.Subscriber;
+import syndexmx.github.com.tgsiren.repositories.FeedMessageRepository;
 import syndexmx.github.com.tgsiren.repositories.SubscriberRepository;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
+import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
 import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
+import syndexmx.github.com.tgsiren.utils.Colorer;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class SubscriberServiceImpl implements SubscriberService {
 
     @Autowired
     SubscriberRepository subscriberRepository;
+
+    @Autowired
+    FeedMessageService feedMessageService;
 
     @Autowired
     ChannelService channelService;
@@ -44,7 +52,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     @Override
     public void notifyAllInterested(String url, FeedMessage feedMessage) {
-        String message = feedMessage.getText() + "\n\n " + feedMessage.getFooter();
+        String message = feedMessage.getText();
         List<Subscriber> subscribersList = subscriberRepository.findAll();
         for (Subscriber subscriber : subscribersList) {
             Long id = subscriber.getId();
@@ -60,6 +68,17 @@ public class SubscriberServiceImpl implements SubscriberService {
             List<ChannelDto> list = channelService.listAllChannels();
             list.forEach(item -> subs.append(item.getName() + "\n"));
             tgBotController.sendMessage(subs.toString(), subscriber);
+        }
+        if (command.equals("Последнее")) {
+            Optional<FeedMessage> lastFeedMessageOptional = feedMessageService.getLast();
+            if (lastFeedMessageOptional.isPresent()) {
+                FeedMessage lastMessage = lastFeedMessageOptional.get();
+                String message = lastMessage.getText();
+                tgBotController.sendMessage( message, subscriber);
+            } else {
+                tgBotController.sendMessage("Нет сообщений", subscriber);
+            }
+
         }
     }
 

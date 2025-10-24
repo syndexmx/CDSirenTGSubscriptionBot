@@ -29,4 +29,9 @@ public class FeedMessageServiceImpl implements FeedMessageService {
             return Optional.ofNullable(savedMessage);
         }
     }
+
+    @Override
+    public Optional<FeedMessage> getLast() {
+        return feedMessageRepository.findTopByOrderByCreatedAtDesc();
+    }
 }

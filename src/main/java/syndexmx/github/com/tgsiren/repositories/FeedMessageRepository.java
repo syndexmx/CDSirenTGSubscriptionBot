@@ -15,4 +15,7 @@ public interface FeedMessageRepository extends JpaRepository<FeedMessage, Long> 
             value = "SELECT * FROM feed_messages fm WHERE fm.footer = ?1",
             nativeQuery = true)
     Optional<FeedMessage> findMessageByFooter(String footer);
+
+    Optional<FeedMessage> findTopByOrderByCreatedAtDesc();
+
 }

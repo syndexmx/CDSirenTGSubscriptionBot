@@ -31,7 +31,7 @@ public class FilterServiceImpl implements FilterService {
             return existingfilter;
         } else {
             Filter savedFilter = filterRepository.save(inFilter);
-            log.info(Colorer.decorate("<white>Добавлен фильтр</> \n<bright-cyan>" + savedFilter.toString() + "</>"));
+            log.info(Colorer.decorate("<white>Filter is added</>: <bright-cyan>" + savedFilter.getFilterString() + "</>"));
             return Optional.ofNullable(savedFilter);
         }
     }

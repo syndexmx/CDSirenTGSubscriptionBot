@@ -1,5 +1,6 @@
 package syndexmx.github.com.tgsiren.controllers.tgbot;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -12,11 +13,13 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import syndexmx.github.com.tgsiren.controllers.tgbot.menu.BotMenu;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
+import syndexmx.github.com.tgsiren.utils.Colorer;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Controller
+@Slf4j
 public class TgBotController extends TelegramLongPollingBot {
     final String BOT_NAME;
     final String BOT_TOKEN;
@@ -52,13 +55,15 @@ public class TgBotController extends TelegramLongPollingBot {
         }
     }
 
-    public void sendMessage (String m, long chatId) {
+    public void sendMessage (String messageText, long chatId) {
         // How to from  https://github.com/rubenlagus/TelegramBots/wiki/Getting-Started
+        if (messageText == null) return;
         SendMessage message = new SendMessage(); // Create a SendMessage object with mandatory fields
         message.setChatId(chatId);
-        message.setText(m);
+        message.setText(messageText);
+        if (messageText == "") message.setText(".");
         message.setReplyMarkup(BotMenu.prepareKeyboard(new ArrayList<>()));
-        message.setParseMode("markdown");
+        message.setParseMode(null);
 
         try {
             execute(message); // Call method to send the message
@@ -67,12 +72,12 @@ public class TgBotController extends TelegramLongPollingBot {
         }
     }
 
-    public void onUpdatesReceived(String m, long chatId) {
+    public void onUpdatesReceived(String messageText, long chatId) {
             // How to from  https://github.com/rubenlagus/TelegramBots/wiki/Getting-Started
             SendMessage message = new SendMessage(); // Create a SendMessage object with mandatory fields
             message.setChatId(chatId);
-            message.setText(m);
-            message.setParseMode("markdown");
+            message.setText(messageText);
+            message.setParseMode(null);
             try {
                 execute(message); // Call method to send the message
             } catch (TelegramApiException e) {
@@ -90,5 +95,7 @@ public class TgBotController extends TelegramLongPollingBot {
     public String getBotToken() {
         return BOT_TOKEN;
     }
+
+
 
 }

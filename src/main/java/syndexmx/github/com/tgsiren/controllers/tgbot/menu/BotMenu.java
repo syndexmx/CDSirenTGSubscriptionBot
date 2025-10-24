@@ -23,6 +23,7 @@ public class BotMenu {
         }
         keyboardRow = new KeyboardRow();
         keyboardRow.add("Подписки");
+        keyboardRow.add("Последнее");
         keyboard.add(keyboardRow);
         keyboardMarkup.setKeyboard(keyboard);
         return keyboardMarkup;

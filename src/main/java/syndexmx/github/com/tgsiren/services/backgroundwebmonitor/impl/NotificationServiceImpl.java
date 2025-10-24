@@ -24,6 +24,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void notifyAllInterested(String url, FeedMessage feedMessage) {
         // TODO
         subscriberService.notifyAllInterested(url, feedMessage);
-        log.info(Colorer.decorate("<magenta>Новое сообщение</>:\n <cyan>" + feedMessage.getText() + "</>\n<purple>" + feedMessage.getFooter().toString() + "</>\n"));
+        log.info(Colorer.decorate("<magenta>Message</>: <purple>" + feedMessage.getFooter().toString() + "</>" +
+                "\n<cyan>" + feedMessage.getText().replaceAll("\\s+", " ")  + "</>"));
     }
 }

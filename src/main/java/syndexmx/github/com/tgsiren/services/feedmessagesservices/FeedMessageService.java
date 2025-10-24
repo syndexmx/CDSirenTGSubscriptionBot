@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface FeedMessageService {
 
     Optional<FeedMessage> addMessage(FeedMessage inMessage);
+    Optional<FeedMessage> getLast();
 }
