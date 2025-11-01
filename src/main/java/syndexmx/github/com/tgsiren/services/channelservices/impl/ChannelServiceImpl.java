@@ -10,7 +10,7 @@ import syndexmx.github.com.tgsiren.entities.Channel;
 import syndexmx.github.com.tgsiren.repositories.ChannelRepository;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
-import syndexmx.github.com.tgsiren.utils.Colorer;
+import syndexmx.github.com.tgsiren.utils.Crayon;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class ChannelServiceImpl implements ChannelService {
             return existingChannel;
         } else {
             Channel savedChannel = channelRepository.save(inChannel);
-            log.info(Colorer.decorate("<white>Channel is added</>: <bright-cyan>" + savedChannel.getName() + "</> <purple>" + savedChannel.getUrl() + "</>"));
+            log.info(Crayon.white("Channel is added") + ": " + Crayon.cyan(savedChannel.getName()) + " " + Crayon.purple(savedChannel.getUrl()));
             try {
                 Thread thread = new Thread(() -> { webMonitor.startMonitor(); });
                 thread.start();
@@ -52,8 +52,8 @@ public class ChannelServiceImpl implements ChannelService {
     public List<ChannelDto> listAllChannels() {
         return channelRepository.findAll().stream()
                 .map(channel -> {ChannelMapper channelMapper = new ChannelMapper();
-                                ChannelDto dto = channelMapper.channelToChannelDto(channel);
-                                return dto;
+                    ChannelDto dto = channelMapper.channelToChannelDto(channel);
+                    return dto;
                 })
                 .toList();
     }

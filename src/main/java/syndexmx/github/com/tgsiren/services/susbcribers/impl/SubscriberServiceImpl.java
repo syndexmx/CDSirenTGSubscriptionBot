@@ -6,15 +6,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import syndexmx.github.com.tgsiren.controllers.tgbot.TgBotController;
 import syndexmx.github.com.tgsiren.dto.ChannelDto;
-import syndexmx.github.com.tgsiren.entities.Channel;
 import syndexmx.github.com.tgsiren.entities.FeedMessage;
 import syndexmx.github.com.tgsiren.entities.Subscriber;
-import syndexmx.github.com.tgsiren.repositories.FeedMessageRepository;
 import syndexmx.github.com.tgsiren.repositories.SubscriberRepository;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
 import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
-import syndexmx.github.com.tgsiren.utils.Colorer;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +32,7 @@ public class SubscriberServiceImpl implements SubscriberService {
     @Autowired
             @Lazy
     TgBotController tgBotController;
+
 
 
     @Override
@@ -62,7 +60,7 @@ public class SubscriberServiceImpl implements SubscriberService {
 
     private void parseCommand(Long subscriber, String command) {
         //TODO
-        tgBotController.sendMessage(command, subscriber);
+        //tgBotController.sendMessage(command, subscriber);
         if (command.equals("Подписки")) {
             StringBuffer subs = new StringBuffer();
             List<ChannelDto> list = channelService.listAllChannels();

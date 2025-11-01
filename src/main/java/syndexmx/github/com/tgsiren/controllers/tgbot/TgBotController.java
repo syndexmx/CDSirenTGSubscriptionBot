@@ -1,5 +1,6 @@
 package syndexmx.github.com.tgsiren.controllers.tgbot;
 
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,7 +14,7 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import syndexmx.github.com.tgsiren.controllers.tgbot.menu.BotMenu;
 import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.susbcribers.SubscriberService;
-import syndexmx.github.com.tgsiren.utils.Colorer;
+import syndexmx.github.com.tgsiren.utils.Crayon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,18 @@ public class TgBotController extends TelegramLongPollingBot {
     final private WebMonitor webMonitor;
     final private SubscriberService subscriberService;
 
+    @PostConstruct
+    public void checkNetwork() {
+        try {
+            java.net.URL url = new java.net.URL("https://api.telegram.org");
+            java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.connect();
+            log.info(Crayon.green("Can reach Telegram API - HTTP " + conn.getResponseCode()));
+        } catch (Exception e) {
+            log.error(Crayon.scarlet("Cannot reach Telegram API: " + e.getMessage()));
+        }
+    }
 
     public TgBotController(@Value("${tg-bot.name}") String botName,
                            @Value("${tg-bot.token}") String botToken,
@@ -48,9 +61,11 @@ public class TgBotController extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        log.debug(Crayon.gray("Telegram update ") + Crayon.lime("received"));
         if (update.hasMessage() && update.getMessage().hasText()) {
             String userFullCommand = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
+            Long chatId = update.getMessage().getChatId();
+            log.info(Crayon.gray("Telegram user ") + Crayon.lime(chatId.toString()));
             subscriberService.serve(chatId, userFullCommand);
         }
     }

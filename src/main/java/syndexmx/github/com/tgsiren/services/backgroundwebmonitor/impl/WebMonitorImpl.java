@@ -12,7 +12,7 @@ import syndexmx.github.com.tgsiren.services.backgroundwebmonitor.WebMonitor;
 import syndexmx.github.com.tgsiren.services.channelservices.ChannelService;
 import syndexmx.github.com.tgsiren.services.feedmessagesservices.FeedMessageService;
 import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
-import syndexmx.github.com.tgsiren.utils.Colorer;
+import syndexmx.github.com.tgsiren.utils.Crayon;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -28,7 +28,6 @@ import java.util.regex.Pattern;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.deTag;
 import static syndexmx.github.com.tgsiren.utils.HtmlBlockExtractor.extractAllClassedBlocks;
 
-
 @Service
 @Slf4j
 public class WebMonitorImpl implements WebMonitor {
@@ -43,10 +42,10 @@ public class WebMonitorImpl implements WebMonitor {
 
     WebMonitorImpl(@Autowired Fetcher fetcher,
                    @Value("${web-monitor.update-interval.ms}") Integer intervalValue,
-                    @Autowired ChannelService channelService,
+                   @Autowired ChannelService channelService,
                    @Autowired FilterService filterService,
                    @Autowired NotificationService notificationService,
-                    @Autowired FeedMessageService feedMessageService) {
+                   @Autowired FeedMessageService feedMessageService) {
         this.fetcher = fetcher;
         this.updateInterval = intervalValue;
         this.channelService = channelService;
@@ -66,7 +65,7 @@ public class WebMonitorImpl implements WebMonitor {
     public void startMonitor() {
         if (initiated) return;
         initiated = true;
-        log.info(Colorer.decorate("<white>Monitoring is running</>"));
+        log.info(Crayon.white("Monitoring is running"));
         FeedMessage startingFeedMessage = FeedMessage.builder()
                 .text("Сервис перезапущен и снова онлайн. \n Вы снова будете получать уведомления. \n" +
                         LocalDateTime.now().toString().replace("T", " "))
@@ -77,9 +76,9 @@ public class WebMonitorImpl implements WebMonitor {
         while (true) {
             try {
                 if (cycle % 360 == 0) {
-                    log.info(Colorer.decorate("<gray>On-line</>"));
+                    log.info(Crayon.gray("On-line"));
                 }
-                //log.info(Colorer.decorate("<gray>Запланированный вызов</>"));
+                //log.info(Crayon.gray("Запланированный вызов"));
                 scanWebSources();
             } catch (IOException e) {
                 // throw new RuntimeException(e);
@@ -110,7 +109,7 @@ public class WebMonitorImpl implements WebMonitor {
                 });
             }
         } catch (RuntimeException exception) {
-            log.error(Colorer.decorate("<scarlet>Error occured" + exception.toString() + "</>"));
+            log.error(Crayon.scarlet("Error occured" + exception.toString()));
             exception.printStackTrace();
         }
 
@@ -119,8 +118,8 @@ public class WebMonitorImpl implements WebMonitor {
     private void scanBlockForFilterMatch(String url, String block) {
         List<String> filterList = filterService.listAllFilters().stream()
                 .map(filterDto -> {
-                        return filterDto.getFilterString();
-                         })
+                    return filterDto.getFilterString();
+                })
                 .toList();
         boolean match = false;
         for (String filter : filterList) {

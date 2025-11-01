@@ -8,7 +8,7 @@ import syndexmx.github.com.tgsiren.dto.dtomappers.FilterMapper;
 import syndexmx.github.com.tgsiren.entities.Filter;
 import syndexmx.github.com.tgsiren.repositories.FilterRepository;
 import syndexmx.github.com.tgsiren.services.filterservices.FilterService;
-import syndexmx.github.com.tgsiren.utils.Colorer;
+import syndexmx.github.com.tgsiren.utils.Crayon;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +31,7 @@ public class FilterServiceImpl implements FilterService {
             return existingfilter;
         } else {
             Filter savedFilter = filterRepository.save(inFilter);
-            log.info(Colorer.decorate("<white>Filter is added</>: <bright-cyan>" + savedFilter.getFilterString() + "</>"));
+            log.info(Crayon.white("Filter is added") + ": " + Crayon.cyan(savedFilter.getFilterString()));
             return Optional.ofNullable(savedFilter);
         }
     }
