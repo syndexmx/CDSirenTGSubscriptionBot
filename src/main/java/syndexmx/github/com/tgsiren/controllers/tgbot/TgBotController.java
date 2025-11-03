@@ -73,14 +73,15 @@ public class TgBotController extends TelegramLongPollingBot {
     public void sendMessage (String messageText, long chatId) {
         // How to from  https://github.com/rubenlagus/TelegramBots/wiki/Getting-Started
         if (messageText == null) return;
-        SendMessage message = new SendMessage(); // Create a SendMessage object with mandatory fields
-        message.setChatId(chatId);
-        message.setText(messageText);
-        if (messageText == "") message.setText(".");
-        message.setReplyMarkup(BotMenu.prepareKeyboard(new ArrayList<>()));
-        message.setParseMode(null);
-
         try {
+            SendMessage message = new SendMessage(); // Create a SendMessage object with mandatory fields
+            message.setChatId(chatId);
+            message.setText(messageText);
+            if (messageText == "") message.setText(".");
+            message.setReplyMarkup(BotMenu.prepareKeyboard(new ArrayList<>()));
+            message.setParseMode(null);
+
+
             execute(message); // Call method to send the message
         } catch (TelegramApiException e) {
             e.printStackTrace();

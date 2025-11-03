@@ -101,12 +101,16 @@ public class WebMonitorImpl implements WebMonitor {
                         return channelDto.getUrl();
                     }).toList();
             for (String url : urlChannelSet) {
-                String receivedNewsFeed = fetcher.getPage(url).toString();
-                List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
-                        "tgme_widget_message_wrap js-widget_message_wrap");
-                divList.forEach(foundSection -> {
-                    scanBlockForFilterMatch(url, foundSection);
-                });
+                try {
+                    String receivedNewsFeed = fetcher.getPage(url).toString();
+                    List<String> divList = extractAllClassedBlocks(receivedNewsFeed, "div",
+                            "tgme_widget_message_wrap js-widget_message_wrap");
+                    divList.forEach(foundSection -> {
+                        scanBlockForFilterMatch(url, foundSection);
+                    });
+                } catch (Exception exception) {
+
+                }
             }
         } catch (RuntimeException exception) {
             log.error(Crayon.scarlet("Error occured" + exception.toString()));
