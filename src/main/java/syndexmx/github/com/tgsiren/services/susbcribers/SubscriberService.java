@@ -6,7 +6,6 @@ import syndexmx.github.com.tgsiren.entities.FeedMessage;
 @Service
 public interface SubscriberService {
 
-    void serve(Long subscriberId, String command);
-
-    void notifyAllInterested(String url, FeedMessage feedMessage);
+    String serve(Long subscriberId, String command);
+    //void notifyAllInterested(String url, FeedMessage feedMessage);
 }

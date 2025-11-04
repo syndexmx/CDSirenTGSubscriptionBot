@@ -25,7 +25,6 @@ public class TgBotController extends TelegramLongPollingBot {
     final String BOT_NAME;
     final String BOT_TOKEN;
 
-    final private WebMonitor webMonitor;
     final private SubscriberService subscriberService;
 
     @PostConstruct
@@ -43,18 +42,10 @@ public class TgBotController extends TelegramLongPollingBot {
 
     public TgBotController(@Value("${tg-bot.name}") String botName,
                            @Value("${tg-bot.token}") String botToken,
-                           @Autowired WebMonitor webMonitor,
                            @Autowired SubscriberService subscriberService) throws TelegramApiException {
         BOT_NAME = botName;
         BOT_TOKEN = botToken;
-        this.webMonitor = webMonitor;
-        Thread backgroundThread = new Thread() {
-            public void run() {
-                webMonitor.startMonitor();
-            }
-        };
         this.subscriberService = subscriberService;
-        backgroundThread.start();
         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
         botsApi.registerBot(this);
     }
@@ -66,7 +57,8 @@ public class TgBotController extends TelegramLongPollingBot {
             String userFullCommand = update.getMessage().getText();
             Long chatId = update.getMessage().getChatId();
             log.info(Crayon.gray("Telegram user ") + Crayon.lime(chatId.toString()));
-            subscriberService.serve(chatId, userFullCommand);
+            String returnMessage = subscriberService.serve(chatId, userFullCommand);
+            sendMessage(returnMessage, chatId);
         }
     }
 

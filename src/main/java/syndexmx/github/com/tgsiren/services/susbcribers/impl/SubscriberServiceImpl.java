@@ -20,23 +20,18 @@ import java.util.Optional;
 @Slf4j
 public class SubscriberServiceImpl implements SubscriberService {
 
-    @Autowired
-    SubscriberRepository subscriberRepository;
+    private final SubscriberRepository subscriberRepository;
+    private final FeedMessageService feedMessageService;
+    private final ChannelService channelService;
 
-    @Autowired
-    FeedMessageService feedMessageService;
-
-    @Autowired
-    ChannelService channelService;
-
-    @Autowired
-            @Lazy
-    TgBotController tgBotController;
-
-
+    public SubscriberServiceImpl(SubscriberRepository subscriberRepository, FeedMessageService feedMessageService, ChannelService channelService) {
+        this.subscriberRepository = subscriberRepository;
+        this.feedMessageService = feedMessageService;
+        this.channelService = channelService;
+    }
 
     @Override
-    public void serve(Long subscriberId, String command) {
+    public String serve(Long subscriberId, String command) {
         Optional<Subscriber> optionalSubscriber = subscriberRepository.findById(subscriberId);
         if (optionalSubscriber.isEmpty()) {
             Subscriber newSubscriber = Subscriber.builder()
@@ -45,39 +40,31 @@ public class SubscriberServiceImpl implements SubscriberService {
             Subscriber subscriber = subscriberRepository.save(newSubscriber);
             optionalSubscriber = Optional.of(subscriber);
         }
-        parseCommand(optionalSubscriber.get().getId(), command);
+        return parseCommand(optionalSubscriber.get().getId(), command);
     }
 
-    @Override
-    public void notifyAllInterested(String url, FeedMessage feedMessage) {
-        String message = feedMessage.getText();
-        List<Subscriber> subscribersList = subscriberRepository.findAll();
-        for (Subscriber subscriber : subscribersList) {
-            Long id = subscriber.getId();
-            tgBotController.sendMessage(message, id);
-        }
-    }
 
-    private void parseCommand(Long subscriber, String command) {
+    private String parseCommand(Long subscriber, String command) {
         //TODO
         //tgBotController.sendMessage(command, subscriber);
         if (command.equals("Подписки")) {
             StringBuffer subs = new StringBuffer();
             List<ChannelDto> list = channelService.listAllChannels();
             list.forEach(item -> subs.append(item.getName() + "\n"));
-            tgBotController.sendMessage(subs.toString(), subscriber);
+            return subs.toString();
         }
         if (command.equals("Последнее")) {
             Optional<FeedMessage> lastFeedMessageOptional = feedMessageService.getLast();
             if (lastFeedMessageOptional.isPresent()) {
                 FeedMessage lastMessage = lastFeedMessageOptional.get();
                 String message = lastMessage.getText();
-                tgBotController.sendMessage( message, subscriber);
+                return message;
             } else {
-                tgBotController.sendMessage("Нет сообщений", subscriber);
+                return "Нет сообщений";
             }
 
         }
+        return "Команда неизвестна";
     }
 
 }

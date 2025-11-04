@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import syndexmx.github.com.tgsiren.controllers.webfetcher.Fetcher;
 import syndexmx.github.com.tgsiren.entities.FeedMessage;
@@ -54,7 +55,7 @@ public class WebMonitorImpl implements WebMonitor {
         this.notificationService = notificationService;
     }
 
-    @PostConstruct
+    @Scheduled(initialDelay = 20000)
     public void init() {
         Thread thread = new Thread(() -> startMonitor());
         thread.start();
@@ -78,7 +79,7 @@ public class WebMonitorImpl implements WebMonitor {
                 if (cycle % 360 == 0) {
                     log.info(Crayon.gray("On-line"));
                 }
-                //log.info(Crayon.gray("Запланированный вызов"));
+                //log.info(Crayon.gray("Scheduled call"));
                 scanWebSources();
             } catch (IOException e) {
                 // throw new RuntimeException(e);
